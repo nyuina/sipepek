@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiPepek — Sistem Pemetaan Penerangan & Panel kWh Meter</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css" integrity="sha512-1BQo9Yk3gTr8z0KfLkCqlGFUyNPflZoQIfZ1+eebU37Y6JYp6VagTZd51zm0icqNVK0TfHf0vE0MnaR3D+QqxA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="preloader" class="preloader" aria-live="polite" aria-label="Memuat halaman">
+    <div class="preloader-inner">
+      <img class="preloader-logo" src="/asset/private/preloader-logo.png" alt="Logo SiPepek" />
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="header-brand">
+      <img class="brand-logo" src="/asset/private/header-logo.png" alt="SiPepek logo" />
+      <p class="brand-title">| Sistem Pemetaan Penerangan & Panel kWh Meter</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Minimalkan navigasi">
+          <span class="sidebar-toggle-icon">⟨</span>
+        </button>
+        <div class="tabs">
+          <button type="button" class="tab active" data-tab="form">
+            <span class="tab-icon">＋</span>
+            <span class="tab-label">Tambah Data</span>
+          </button>
+          <button type="button" class="tab" data-tab="list">
+            <span class="tab-icon">☰</span>
+            <span class="tab-label">Daftar Titik</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button type="button" id="btn-export" class="sidebar-action sidebar-action-export">
+          <span class="icon">⬇</span>
+          <span class="sidebar-action-label">Export</span>
+        </button>
+        <label class="sidebar-action sidebar-action-import">
+          <span class="icon">⬆</span>
+          <span class="sidebar-action-label">Import</span>
+          <input type="file" id="input-import" accept=".json" hidden>
+        </label>
+      </div>
+
+      <!-- Tab: Form -->
+      <div class="tab-panel active" id="panel-form">
+        <form id="point-form" class="form">
+          <input type="hidden" id="point-id">
+          <input type="hidden" id="point-lat">
+          <input type="hidden" id="point-lng">
+
+          <div class="form-group">
+            <label for="point-type">Jenis Titik</label>
+            <select id="point-type" required>
+              <option value="lampu">Penerangan Jalan (Lampu)</option>
+              <option value="panel">Panel Meter Listrik</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="point-name">Nama / Kode Titik</label>
+            <input type="text" id="point-name" placeholder="Contoh: PJL-001" required>
+          </div>
+
+          <div class="form-group">
+            <label for="point-location">Lokasi / Nama Jalan</label>
+            <input type="text" id="point-location" placeholder="Contoh: Jl. Merdeka No. 12">
+          </div>
+
+          <!-- Fields khusus Lampu -->
+          <div id="fields-lampu" class="type-fields">
+            <div class="form-group">
+              <label for="lamp-type">Jenis Lampu</label>
+              <select id="lamp-type">
+                <option value="LED">LED</option>
+                <option value="HPS">Son-T</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="lamp-power">Daya (Watt)</label>
+              <select id="lamp-power">
+                <option value="40">40</option>
+                <option value="60">60</option>
+                <option value="90">90</option>
+                <option value="120">120</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pole-height">Tinggi Tiang (m)</label>
+              <select id="pole-height">
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="12">12</option>
+                <option value="14">14</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="lamp-panel">Panel Meter Terhubung</label>
+              <select id="lamp-panel">
+                <option value="">— Tidak terhubung —</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Fields khusus Panel -->
+          <div id="fields-panel" class="type-fields hidden">
+            <div class="form-group">
+              <label for="meter-number">Nomor Meter</label>
+              <input type="text" id="meter-number" placeholder="PLN-12345678">
+            </div>
+            <div class="form-group">
+              <label for="panel-capacity">Kapasitas (kVA)</label>
+              <input type="number" id="panel-capacity" placeholder="25" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="panel-phase">Fase</label>
+              <select id="panel-phase">
+                <option value="1">1 Fase</option>
+                <option value="3">3 Fase</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="point-photo">Foto Titik</label>
+              <input type="file" id="point-photo" accept="image/*">
+              <div class="photo-preview hidden" id="photo-preview">
+                <img src="" alt="Preview foto titik" id="photo-preview-img">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="point-condition">Kondisi</label>
+            <select id="point-condition" required>
+              <option value="baik">Baik</option>
+              <option value="rusak_ringan">Rusak Ringan</option>
+              <option value="rusak_berat">Rusak Berat</option>
+              <option value="tidak_aktif">Tidak Aktif</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="point-notes">Catatan</label>
+            <textarea id="point-notes" rows="2" placeholder="Catatan tambahan..."></textarea>
+          </div>
+
+          <div class="coords-display" id="coords-display">
+            <span class="coords-label">Koordinat:</span>
+            <span class="coords-value">Klik peta untuk menentukan lokasi</span>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="btn-submit">Simpan Titik</button>
+            <button type="button" class="btn btn-secondary" id="btn-cancel" hidden>Batal</button>
+          </div>
+        </form>
+
+        <div class="hint-box">
+          <strong>Petunjuk:</strong> Klik peta untuk menempatkan titik. Panel meter dapat dikelompokkan dengan beberapa titik lampu — buka detail panel untuk mengatur grup, atau pilih panel saat menambah lampu.
+        </div>
+      </div>
+
+      <!-- Tab: List -->
+      <div class="tab-panel" id="panel-list">
+        <div class="list-toolbar">
+          <input type="search" id="search-input" placeholder="Cari titik..." class="search-input">
+          <select id="filter-type" class="filter-select">
+            <option value="all">Semua Jenis</option>
+            <option value="lampu">Lampu</option>
+            <option value="panel">Panel Meter</option>
+          </select>
+        </div>
+        <div class="stats-bar">
+          <span class="stat stat-lampu">💡 Lampu: <strong id="count-lampu">0</strong></span>
+          <span class="stat stat-panel">⚡ Panel: <strong id="count-panel">0</strong></span>
+        </div>
+        <ul id="point-list" class="point-list"></ul>
+      </div>
+    </aside>
+
+    <section class="map-container">
+      <div id="map"></div>
+      <div class="map-floating-stack">
+        <div class="map-legend">
+          <div class="legend-item"><span class="legend-dot lampu"></span> Penerangan Jalan</div>
+          <div class="legend-item"><span class="legend-dot panel"></span> Panel Meter</div>
+          <div class="legend-item"><span class="legend-line"></span> Koneksi Panel–Lampu</div>
+          <label class="legend-toggle">
+            <input type="checkbox" id="toggle-lines" checked> Tampilkan koneksi
+          </label>
+        </div>
+        <button type="button" id="btn-locate-map" class="map-fab" title="Lokasi saya">
+          <span class="icon">📍</span>
+          <span>Lokasi Saya</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal detail -->
+  <dialog id="detail-modal" class="modal">
+    <div class="modal-content">
+      <button type="button" class="modal-close" id="modal-close">&times;</button>
+      <div id="modal-body"></div>
+      <div id="modal-group-section" class="modal-group-section hidden"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="modal-edit">Edit</button>
+        <button type="button" class="btn btn-danger" id="modal-delete">Hapus</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YEf+PzQ0a1MOwKz4fKcV1eZfN7bQ2H+2nYF0B2QaCIZ3ZFk3E4q4ZmEf1ZH3s6p/8ZxIIWe+AxpH0J6G3kQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js" integrity="sha512-Is0M4Y0NUvhP1E2lNA4upry3bVQqXPTxbIw6KdKQx0JubEOVaDZ9xTjHZZcv1qsYntYEvTNAT+2n2b6n3MPR0w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
