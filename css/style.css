@@ -1383,4 +1383,42 @@ body {
     max-width: 100%;
     text-align: left;
   }
+
+  /* Mobile: enable minimizable bottom sidebar and drag handle */
+  .sidebar {
+    transition: max-height 0.25s ease, padding 0.2s ease;
+  }
+
+  .sidebar.collapsed {
+    max-height: 64px;
+    padding: 0.5rem 0.75rem;
+    overflow: hidden;
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
+  }
+
+  .sidebar-header {
+    cursor: grab;
+    position: relative;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .sidebar-header::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: rgba(15, 23, 42, 0.06);
+    border-radius: 999px;
+  }
+
+  /* hide tab content when minimized on mobile */
+  .sidebar.collapsed .tab-panel {
+    display: none !important;
+  }
+
 }

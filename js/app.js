@@ -180,6 +180,37 @@ function initApp() {
     }
   });
 
+  // Mobile: allow swipe gestures on the sidebar header to minimize/expand
+  const sidebarHeader = document.querySelector('.sidebar-header');
+  let touchStartY = null;
+  if (sidebarHeader) {
+    sidebarHeader.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    sidebarHeader.addEventListener('touchend', (e) => {
+      if (touchStartY == null) return;
+      const endY = e.changedTouches[0].clientY;
+      const delta = touchStartY - endY;
+      // swipe up (positive delta) -> expand; swipe down (negative delta) -> collapse
+      if (Math.abs(delta) > 30) {
+        if (delta > 0) {
+          sidebar.classList.remove('collapsed');
+        } else {
+          sidebar.classList.add('collapsed');
+        }
+        sidebarToggle.setAttribute('aria-label', sidebar.classList.contains('collapsed') ? 'Buka navigasi' : 'Minimalkan navigasi');
+        const mapInstance = getMap();
+        if (mapInstance) {
+          requestAnimationFrame(() => {
+            setTimeout(() => mapInstance.invalidateSize(), 180);
+          });
+        }
+      }
+      touchStartY = null;
+    }, { passive: true });
+  }
+
   window.addEventListener('resize', () => {
     const mapInstance = getMap();
     if (mapInstance) {

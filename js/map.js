@@ -27,12 +27,32 @@ function createIcon(type, isTemp = false, isHighlighted = false) {
 export function initMap(containerId, clickHandler) {
   onMapClick = clickHandler;
 
-  map = L.map(containerId).setView(CONFIG.defaultCenter, CONFIG.defaultZoom);
-
-  L.tileLayer(CONFIG.mapTileUrl, {
+  const osmLayer = L.tileLayer(CONFIG.mapTileUrl, {
     attribution: CONFIG.mapAttribution,
     maxZoom: 19,
-  }).addTo(map);
+  });
+
+  const satelliteLayer = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution:
+        'Tiles &copy; Esri &mdash; Sumber: Esri, Maxar, Earthstar Geographics, and the GIS user community',
+      maxZoom: 19,
+    }
+  );
+
+  map = L.map(containerId, {
+    center: CONFIG.defaultCenter,
+    zoom: CONFIG.defaultZoom,
+    layers: [osmLayer],
+  });
+
+  const baseMaps = {
+    'OpenStreetMap': osmLayer,
+    'Citra Satelit': satelliteLayer,
+  };
+
+  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
   map.createPane('connectionPane');
   map.getPane('connectionPane').style.zIndex = 400;
