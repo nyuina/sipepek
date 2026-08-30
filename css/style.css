@@ -1190,6 +1190,43 @@ body {
   background: var(--color-panel);
 }
 
+/* Marker label (below icon) */
+.marker-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.marker-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 36px;
+  white-space: nowrap;
+  background: rgba(255,255,255,0.96);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 6px 14px rgba(15,23,42,0.06);
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+.marker-label.lampu { background: rgba(255,250,240,0.97); }
+.marker-label.panel { background: rgba(249,255,250,0.97); }
+
+.marker-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .marker-label { font-size: 11px; padding: 3px 6px; top: 34px; }
+  .marker-sub { font-size: 10px; }
+}
+
 .temp-marker {
   background: var(--color-primary) !important;
   animation: pulse 1.5s infinite;

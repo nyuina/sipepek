@@ -560,12 +560,23 @@ function renderGroupSection(container, panel, allPoints, onGroupChange, onLampCl
         ${connected.map((l) => `
           <li><button type="button" class="link-btn" data-lamp-id="${l.id}">💡 ${escapeHtml(l.name)}</button></li>
         `).join('')}
-      </ul>` : ''}
+      </ul>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <button type="button" class="btn btn-danger btn-sm" id="btn-delete-group">Hapus Grup</button>
+        <div style="flex:1"></div>
+      </div>
+    ` : ''}
     <button type="button" class="btn btn-primary btn-sm" id="btn-save-group">Simpan Grup</button>`;
 
   container.querySelector('#btn-save-group')?.addEventListener('click', () => {
     const checked = [...container.querySelectorAll('#group-lamp-list input:checked')].map((cb) => cb.value);
     onGroupChange(panel.id, checked);
+  });
+
+  // Delete whole group: disconnect all lamps from this panel with confirmation
+  container.querySelector('#btn-delete-group')?.addEventListener('click', () => {
+    if (!confirm(`Hapus grup panel "${escapeHtml(panel.name)}"?\nSemua lampu yang terhubung akan dilepas.`)) return;
+    onGroupChange(panel.id, []);
   });
 
   container.querySelectorAll('.link-btn').forEach((btn) => {

@@ -255,6 +255,21 @@ function initApp() {
     refreshUI();
   });
 
+  const toggleLabels = document.getElementById('toggle-labels');
+  if (toggleLabels) {
+    // initialize
+    // lazy import setShowLabels from map module
+    import('./map.js').then((m) => {
+      m.setShowLabels(toggleLabels.checked);
+    });
+    toggleLabels.addEventListener('change', (e) => {
+      import('./map.js').then((m) => {
+        m.setShowLabels(e.target.checked);
+        refreshUI();
+      });
+    });
+  }
+
   document.getElementById('btn-export').addEventListener('click', () => {
     exportToJson(points);
     showToast(`${points.length} titik diekspor`);

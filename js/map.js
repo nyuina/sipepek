@@ -10,15 +10,35 @@ let linesLayer = null;
 let tempMarker = null;
 let onMapClick = null;
 let showLines = true;
+let showLabels = true;
 let highlightPanelId = null;
 
-function createIcon(type, isTemp = false, isHighlighted = false) {
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function createIcon(type, isTemp = false, isHighlighted = false, label = '', sub = '') {
   const info = POINT_TYPES[type] || POINT_TYPES.lampu;
   const highlightClass = isHighlighted ? ' highlighted' : '';
+
+  const labelHtml = (showLabels && label)
+    ? `<span class="marker-label ${type}">${escapeHtml(label)}${sub ? `<small class="marker-sub">${escapeHtml(sub)}</small>` : ''}</span>`
+    : '';
+
+  const iconHtml = labelHtml
+    ? `<div class="marker-wrapper"><div class="marker-icon ${type}${isTemp ? ' temp-marker' : ''}${highlightClass}">${info.icon}</div>${labelHtml}</div>`
+    : `<div class="marker-icon ${type}${isTemp ? ' temp-marker' : ''}${highlightClass}">${info.icon}</div>`;
+
   return L.divIcon({
     className: '',
-    html: `<div class="marker-icon ${type}${isTemp ? ' temp-marker' : ''}${highlightClass}">${info.icon}</div>`,
-    iconSize: [32, 32],
+    html: iconHtml,
+    iconSize: [32, 44],
     iconAnchor: [16, 16],
     popupAnchor: [0, -16],
   });
@@ -142,8 +162,11 @@ export function renderMarkers(points, onMarkerClick, connections = []) {
       point.id === highlightPanelId ||
       (highlightedLampIds && highlightedLampIds.has(point.id));
 
+    const labelText = point.name || '';
+    const subText = point.type === 'panel' ? (point.meterNumber || '') : '';
+
     const marker = L.marker([point.lat, point.lng], {
-      icon: createIcon(point.type, false, isHighlighted),
+      icon: createIcon(point.type, false, isHighlighted, labelText, subText),
     });
 
     marker.on('click', () => onMarkerClick(point));
@@ -199,6 +222,10 @@ export function renderConnectionLines(connections, activePanelId = null) {
 export function setShowLines(visible) {
   showLines = visible;
   if (!visible) linesLayer.clearLayers();
+}
+
+export function setShowLabels(visible) {
+  showLabels = visible;
 }
 
 export function setHighlightPanel(panelId) {
