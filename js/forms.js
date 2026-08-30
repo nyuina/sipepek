@@ -286,6 +286,21 @@ export function switchToFormTab() {
 /* ---- List rendering ---- */
 
 function renderPanelGroup(panel, lamps, activeId, onItemClick) {
+  const lampsHtml = lamps
+    .map((lamp) => {
+      const sub = escapeHtml(lamp.location || 'Lokasi tidak diisi');
+      return `
+      <li class="point-item grouped-item${lamp.id === activeId ? ' active' : ''}" data-id="${lamp.id}">
+        <div class="point-badge ${lamp.type}">${POINT_TYPES[lamp.type].icon}</div>
+        <div class="point-info">
+          <h4>${escapeHtml(lamp.name)}</h4>
+          <p>${sub}</p>
+        </div>
+        <span class="condition-badge condition-${lamp.condition}">${CONDITIONS[lamp.condition]}</span>
+      </li>`;
+    })
+    .join('');
+
   return `
     <li class="point-item panel-group-heading${panel.id === activeId ? ' active' : ''}" data-id="${panel.id}">
       <div class="point-badge panel">${POINT_TYPES.panel.icon}</div>
@@ -295,21 +310,11 @@ function renderPanelGroup(panel, lamps, activeId, onItemClick) {
         <p>⚡ ${lamps.length} titik lampu terhubung</p>
       </div>
       <span class="condition-badge condition-${panel.condition}">${CONDITIONS[panel.condition]}</span>
+      <button type="button" class="group-toggle" aria-expanded="true">▾</button>
     </li>
-    ${lamps
-      .map((lamp) => {
-        const sub = escapeHtml(lamp.location || 'Lokasi tidak diisi');
-        return `
-      <li class="point-item grouped-item${lamp.id === activeId ? ' active' : ''}" data-id="${lamp.id}">
-        <div class="point-badge ${lamp.type}">${POINT_TYPES[lamp.type].icon}</div>
-        <div class="point-info">
-          <h4>${escapeHtml(lamp.name)}</h4>
-          <p>${sub}</p>
-        </div>
-        <span class="condition-badge condition-${lamp.condition}">${CONDITIONS[lamp.condition]}</span>
-      </li>`;
-      })
-      .join('')}
+    <ul class="grouped-list" data-parent="${panel.id}">
+      ${lampsHtml}
+    </ul>
   `;
 }
 
@@ -406,10 +411,34 @@ export function renderPointList(points, allPoints, activeId, onItemClick) {
 
   list.innerHTML = html;
 
+  // item click (open detail) for any point-item
   list.querySelectorAll('.point-item').forEach((item) => {
     item.addEventListener('click', () => {
       const id = item.dataset.id;
+      if (!id) return;
       onItemClick(points.find((p) => p.id === id));
+    });
+  });
+
+  // group toggle: collapse/expand grouped-list without opening detail
+  list.querySelectorAll('.group-toggle').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const heading = btn.closest('.panel-group-heading');
+      if (!heading) return;
+      const parentId = heading.dataset.id;
+      const grouped = list.querySelector(`.grouped-list[data-parent="${parentId}"]`);
+      if (!grouped) return;
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      if (expanded) {
+        grouped.classList.add('collapsed');
+        btn.setAttribute('aria-expanded', 'false');
+        heading.classList.add('collapsed');
+      } else {
+        grouped.classList.remove('collapsed');
+        btn.setAttribute('aria-expanded', 'true');
+        heading.classList.remove('collapsed');
+      }
     });
   });
 }

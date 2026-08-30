@@ -821,6 +821,36 @@ body {
   background: #eef2ff;
 }
 
+.group-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+}
+
+.group-toggle:hover { color: var(--color-text); }
+
+.grouped-list {
+  list-style: none;
+  margin: 0 0 0 0.5rem;
+  padding: 0.25rem 0 0 0;
+  transition: max-height 0.2s ease, opacity 0.2s ease;
+}
+
+.grouped-list.collapsed {
+  display: none;
+}
+
+.panel-group-heading.collapsed {
+  opacity: 0.9;
+}
+
 .point-item {
   display: flex;
   align-items: center;

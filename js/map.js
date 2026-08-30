@@ -163,15 +163,29 @@ export function renderConnectionLines(connections, activePanelId = null) {
     let previousPoint = panelPoint;
     orderedLamps.forEach((lamp, index) => {
       const currentPoint = L.latLng(lamp.lat, lamp.lng);
-      const offsetStart = offsetLatLng(previousPoint, currentPoint, 16);
-      const offsetEnd = offsetLatLng(currentPoint, previousPoint, 16);
+      // determine pixel distance between points to choose proportional offset and weight
+      const fromPt = map.latLngToLayerPoint(previousPoint);
+      const toPt = map.latLngToLayerPoint(currentPoint);
+      const dx = toPt.x - fromPt.x;
+      const dy = toPt.y - fromPt.y;
+      const segLen = Math.sqrt(dx * dx + dy * dy);
+
+      // offset a bit from the marker toward the line; scale with distance but clamp
+      const offsetPx = Math.max(10, Math.min(30, Math.round(segLen * 0.06)));
+      const offsetStart = offsetLatLng(previousPoint, currentPoint, offsetPx);
+      const offsetEnd = offsetLatLng(currentPoint, previousPoint, offsetPx);
+
+      // choose weight proportional to segment length, clamped for readability
+      const baseWeight = Math.max(2, Math.min(6, Math.round(2 + segLen / 120)));
+      const weight = isActive ? baseWeight + 1 : baseWeight;
+
       const line = L.polyline(
         [offsetStart, offsetEnd],
         {
           pane: 'connectionPane',
           color: isActive ? '#2563eb' : '#94a3b8',
-          weight: isActive ? 3 : 2,
-          opacity: isActive ? 0.9 : 0.55,
+          weight: weight,
+          opacity: isActive ? 0.95 : 0.7,
           dashArray: isActive ? null : '6 4',
           lineCap: 'round',
         }
