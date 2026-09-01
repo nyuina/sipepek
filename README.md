@@ -1,4 +1,4 @@
-# SPOT — Sistem Pemetaan Penerangan & Panel Meter
+# SiPepeK — Sistem Pemetaan Penerangan & Panel KwH Meter
 
 Aplikasi web untuk pemetaan dan pendataan **titik penerangan jalan** serta **titik panel meter listrik** menggunakan peta OpenStreetMap (gratis).
 
@@ -28,33 +28,6 @@ spot/
 │   └── app.js          # Entry point aplikasi
 └── README.md
 ```
-
-## Requirement
-
-- **Node.js LTS** (v18+) — [nodejs.org](https://nodejs.org/) atau via winget:
-  ```bash
-  winget install OpenJS.NodeJS.LTS
-  ```
-
-## Cara Menjalankan
-
-### Opsi 1: Double-click (Windows)
-
-Jalankan file **`start.bat`** — otomatis install dependensi dan membuka server.
-
-### Opsi 2: npm
-
-```bash
-cd spot
-npm install
-npm start
-```
-
-Buka browser: **http://localhost:8080**
-
-### Opsi 3: Live Server (Cursor/VS Code)
-
-Klik kanan `index.html` → **Open with Live Server**
 
 ## Cara Penggunaan
 
