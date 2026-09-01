@@ -178,6 +178,7 @@ function initApp() {
         setTimeout(() => mapInstance.invalidateSize(), 180);
       });
     }
+      updateSidebarTogglePos();
   });
 
   // Mobile: allow swipe gestures on the sidebar header to minimize/expand
@@ -211,11 +212,26 @@ function initApp() {
     }, { passive: true });
   }
 
+    // adjust floating toggle position to sit beside sidebar when open
+    function updateSidebarTogglePos() {
+      const btn = document.getElementById('sidebar-mobile-toggle');
+      if (!btn) return;
+      const sb = document.getElementById('sidebar');
+      if (sb && !sb.classList.contains('collapsed')) {
+        const rect = sb.getBoundingClientRect();
+        const left = Math.max(8, rect.right + 12);
+        btn.style.left = `${left}px`;
+      } else {
+        btn.style.left = '12px';
+      }
+    }
+
   window.addEventListener('resize', () => {
     const mapInstance = getMap();
     if (mapInstance) {
       requestAnimationFrame(() => mapInstance.invalidateSize());
     }
+      updateSidebarTogglePos();
   });
 
   initFormHandlers({
@@ -248,6 +264,21 @@ function initApp() {
   const mapLocateButton = document.getElementById('btn-locate-map');
   if (mapLocateButton) {
     mapLocateButton.addEventListener('click', handleLocate);
+  }
+
+  // mobile floating toggle (center-left)
+  const mobileToggle = document.getElementById('sidebar-mobile-toggle');
+  if (mobileToggle) {
+    mobileToggle.addEventListener('click', () => {
+      const collapsed = sidebar.classList.toggle('collapsed');
+      sidebarToggle.setAttribute('aria-label', collapsed ? 'Buka navigasi' : 'Minimalkan navigasi');
+      const mapInstance = getMap();
+      if (mapInstance) {
+        requestAnimationFrame(() => {
+          setTimeout(() => mapInstance.invalidateSize(), 180);
+        });
+      }
+    });
   }
 
   document.getElementById('toggle-lines').addEventListener('change', (e) => {
@@ -314,6 +345,7 @@ function initApp() {
 
   refreshUI();
   if (points.length > 0) fitBounds(points);
+    updateSidebarTogglePos();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
